@@ -1,5 +1,5 @@
 "use server"
-import  redis  from "@/lib/redis";
+import redis from '../lib/redis'
 
 export async function getAllDataFromRedis() {
     try {
@@ -21,6 +21,30 @@ export async function getAllDataFromRedis() {
       console.error("Error:", error);
     }
   }
+
+  export async function getData(key:string, type:string) {
+// console.log(key, type);
+
+  switch (type) {
+    case "string":
+      return await redis.get(key);
+    case "hash":
+      return await redis.hgetall(key);
+    case "list":
+      return await redis.lrange(key, 0, -1);
+    case "set":
+      return await redis.smembers(key);
+    case "zset":
+      return await redis.zrange(key, 0, -1, "WITHSCORES");
+    case "stream":
+      return await redis.xrange(key, "-", "+");
+    case "ReJSON-RL":
+      const res = await redis.call("JSON.GET", key);
+      return JSON.parse(res);
+    default:
+      return "";
+  }
+}
 
   // export async function buildFolderStructure(keys : any) {
   //   const root = {};
