@@ -8,10 +8,18 @@ interface NestedObject {
 
 interface Props {
   data: NestedObject;
+
   setviewData: any;
+  checkedData: any;
+  setcheckedData: any;
 }
 
-const NestedList: React.FC<Props> = ({ data, setviewData }) => {
+const NestedList: React.FC<Props> = ({
+  data,
+  setviewData,
+  checkedData,
+  setcheckedData,
+}) => {
   const [collapsedItems, setCollapsedItems] = useState<string[]>([]);
   const [transformedArray, setTransformedArray] = useState({});
 
@@ -20,7 +28,7 @@ const NestedList: React.FC<Props> = ({ data, setviewData }) => {
   }, []);
 
   const toggleCollapse = (key: string, path: string) => {
-    const item = path ? `${path}.${key}` : key;
+    const item = path ? `${path}:${key}` : key;
     if (collapsedItems.includes(item)) {
       setCollapsedItems(collapsedItems.filter((i) => i !== item));
     } else {
@@ -48,13 +56,43 @@ const NestedList: React.FC<Props> = ({ data, setviewData }) => {
     console.log(foundObject, "foundobject");
   };
 
+  const getPath = (newpath) => {
+    console.log(newpath);
+
+    const array = newpath.split(".");
+    console.log(transformedArray);
+
+    // array.forEach((x, i) => {
+    //   console.log(x, i);
+    // });
+  };
+
   const renderNested = (
     obj: NestedObject,
     depth: number,
     path: string = ""
   ): JSX.Element[] | JSX.Element => {
+    const checkEle = (itemPath) => {
+      console.log(itemPath);
+      // console.log(checkedData);
+
+      // checkedData.map((ele) => {
+      //   console.log(ele.indexOf(itemPath) !== -1);
+      // });
+
+      if (checkedData.includes(itemPath)) {
+        const allele = checkedData;
+        const index = allele.indexOf(itemPath);
+        allele.splice(index, 1);
+        setcheckedData(allele);
+        return;
+      }
+
+      setcheckedData((pre) => [...pre, itemPath]);
+    };
+
     return Object.entries(obj).map(([key, value]) => {
-      const itemPath = path ? `${path}.${key}` : key;
+      const itemPath = path ? `${path}:${key}` : key;
       if (typeof value === "object" && value !== null) {
         return (
           <li key={key} style={{ marginLeft: depth * 10 + "px" }}>
@@ -62,6 +100,18 @@ const NestedList: React.FC<Props> = ({ data, setviewData }) => {
               onClick={() => toggleCollapse(key, path)}
               style={{ cursor: "pointer" }}
             >
+              <input
+                type="checkbox"
+                // id="vehicle1"
+                // name="vehicle1"
+                // value="Bike"
+                onClick={() => {
+                  // console.log(key);
+
+                  // setCheck((pre) => !pre);
+                  checkEle(itemPath);
+                }}
+              ></input>
               {collapsedItems.includes(itemPath) ? "+" : "-"} {key}
             </span>
             {!collapsedItems.includes(itemPath) && (

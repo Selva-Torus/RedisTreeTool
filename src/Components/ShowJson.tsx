@@ -1,5 +1,4 @@
 import React from "react";
-import "react-json-view-lite/dist/index.css";
 import { JSONTree } from "react-json-tree";
 
 const ShowJson = ({ data, selectedKey, selectedDataType, setData }: any) => {

@@ -18,13 +18,42 @@ const RedisFolder = ({ setviewData }: any) => {
     });
   }, []);
 
+  const [checkedData, setcheckedData] = useState<any>([]);
+
+  const Show = () => {
+    console.log(checkedData);
+
+    var delArray: any = [];
+
+    for (let i = 0; i < checkedData.length; i++) {
+      data.map((ele) => {
+        if (ele.key.includes(checkedData[i])) delArray = [...delArray, ele.key];
+      });
+    }
+
+    let uniqueArray = delArray.filter((item, index) => {
+      return delArray.indexOf(item) === index;
+    });
+    console.log(uniqueArray);
+  };
+
   return (
     <div>
-      {Object.keys(data).length ? (
-        <NestedList data={data} setviewData={setviewData} />
-      ) : (
-        <>djdh</>
-      )}
+      <div>
+        <button onClick={Show}>show</button>
+      </div>
+      <div>
+        {Object.keys(data).length ? (
+          <NestedList
+            data={data}
+            setviewData={setviewData}
+            checkedData={checkedData}
+            setcheckedData={setcheckedData}
+          />
+        ) : (
+          <>djdh</>
+        )}
+      </div>
     </div>
   );
 };
