@@ -18,6 +18,7 @@ import {
 import DatasettingModal from "./DatasettingModal";
 import { typeOptions } from "./data";
 import { capitalize } from "./utils";
+import { deleteData } from "./apiCallUnit";
 
 interface NestedObject {
   [key: string]: any;
@@ -36,6 +37,8 @@ const RedisFolder = ({ setviewData, setRedisView }: any) => {
   const [typeFilter, setTypeFilter] = React.useState<Selection>("all");
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [filterValue, setFilterValue] = React.useState("");
+
+  const [bulkDeleteData, setBulkDeleteData] = useState<any>([]);
 
   const hasSearchFilter = Boolean(filterValue);
 
@@ -75,7 +78,8 @@ const RedisFolder = ({ setviewData, setRedisView }: any) => {
   useEffect(() => {
     filterWithTypes();
   }, [typeFilter]);
-  const Show = () => {
+
+  const handleBulkDelete = async () => {
     console.log("checkedData", checkedData);
     var delArray: any = [];
     for (let i = 0; i < checkedData.length; i++) {
@@ -88,12 +92,11 @@ const RedisFolder = ({ setviewData, setRedisView }: any) => {
     });
     console.log("del array", uniqueArray);
   };
-
   return (
     <div>
       <div className="flex w-full justify-between">
         <div>
-          <Button onClick={Show}> Delete</Button>
+          <Button onClick={handleBulkDelete}> Delete</Button>
         </div>
         <div className="flex gap-4">
           <Button onClick={onOpen} color="primary" className="flex gap-1">
