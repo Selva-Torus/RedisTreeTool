@@ -3,7 +3,8 @@ import { getData } from "@/utils/utitsfunction";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoIosArrowForward } from "react-icons/io";
-
+import { FaRegFolderOpen } from "react-icons/fa";
+import { FaRegFolder } from "react-icons/fa";
 interface NestedObject {
   [key: string]: any;
 }
@@ -61,11 +62,16 @@ const NestedList: React.FC<Props> = ({
     depth: number,
     path: string = ""
   ): JSX.Element[] | JSX.Element => {
-    return Object.entries(obj).map(([key, value]) => {
+    return Object.entries(obj).map(([key, value], index) => {
       const itemPath = path ? `${path}:${key}` : key;
+      const isEven = index % 2 === 0;
+      const listItemStyle = {
+        backgroundColor: isEven ? "#f3f4f6" : "#ffffff",
+      };
+
       if (typeof value === "object" && value !== null) {
         return (
-          <li key={key}>
+          <li key={key} style={listItemStyle}>
             <div
               className="flex items-center cursor-pointer text-blue-500 hover:text-blue-700"
               onClick={() => toggleCollapse(key, path)}
@@ -77,20 +83,20 @@ const NestedList: React.FC<Props> = ({
                 onClick={() => checkEle(itemPath)}
               />
               {collapsedItems.includes(itemPath) ? (
-                <IoIosArrowForward size={20} />
+                <FaRegFolderOpen size={20} />
               ) : (
-                <IoIosArrowDown size={20} />
+                <FaRegFolder size={20} />
               )}
               <span className="ml-2">{key}</span>
             </div>
-            {!collapsedItems.includes(itemPath) && (
+            {collapsedItems.includes(itemPath) && (
               <ul>{renderNested(value, depth + 1, itemPath)}</ul>
             )}
           </li>
         );
       } else {
         return (
-          <li key={key}>
+          <li key={key} style={listItemStyle}>
             <span
               className="cursor-pointer text-green-500 hover:text-green-700"
               onClick={() => handleGetData(path)}
