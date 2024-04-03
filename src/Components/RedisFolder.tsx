@@ -1,36 +1,21 @@
 "use client";
-import { getAllDataFromRedis, getData } from "@/utils/utitsfunction";
+import { getAllDataFromRedis } from "@/utils/utitsfunction";
 import React, { useEffect, useState } from "react";
 import NestedList from "./NestedList";
 import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Input,
   Button,
   DropdownTrigger,
   Dropdown,
   DropdownMenu,
   DropdownItem,
-  User,
-  Pagination,
   Selection,
-  SortDescriptor,
-  Spinner,
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   useDisclosure,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
 } from "@nextui-org/react";
 import DatasettingModal from "./DatasettingModal";
-import { getAllKeys } from "./apiCallUnit";
 import { typeOptions } from "./data";
 import { capitalize } from "./utils";
 
@@ -44,13 +29,21 @@ interface Key {
 }
 
 const RedisFolder = ({ setviewData, setRedisView }: any) => {
+  const [allData, setAllData] = useState<NestedObject>({});
+
   const [data, setData] = useState<NestedObject>({});
+  const [checkedData, setcheckedData] = useState<any>([]);
   const [typeFilter, setTypeFilter] = React.useState<Selection>("all");
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [filterValue, setFilterValue] = React.useState("");
+
+  const hasSearchFilter = Boolean(filterValue);
 
   function fetchData() {
     getAllDataFromRedis().then((res: any) => {
       if (res && Array.isArray(res)) {
         setData(res);
+        setAllData(res);
       }
     });
   }
@@ -59,33 +52,42 @@ const RedisFolder = ({ setviewData, setRedisView }: any) => {
     fetchData();
   }, []);
 
-  // useEffect(() => {
-  //   getAllDataFromRedis().then((res: any) => {
-  //     if (res && Array.isArray(res)) {
-  //       setData(res);
-  //     }
-  //   });
-  // }, []);
+  const filterWithTypes = () => {
+    let filteredKeys = allData;
+    if (hasSearchFilter) {
+      filteredKeys = filteredKeys.filter((item: Key) =>
+        item.key.toLowerCase().includes(filterValue.toLowerCase())
+      );
+    }
+    if (
+      typeFilter !== "all" &&
+      Array.from(typeFilter).length !== typeOptions.length
+    ) {
+      filteredKeys = filteredKeys.filter((item: Key) =>
+        Array.from(typeFilter).includes(item.type)
+      );
+    }
+    setData(filteredKeys);
+    // console.log(typeFilter);
 
-  const [checkedData, setcheckedData] = useState<any>([]);
-
+    // console.log(typeof typeFilter);
+  };
+  useEffect(() => {
+    filterWithTypes();
+  }, [typeFilter]);
   const Show = () => {
     console.log("checkedData", checkedData);
-
     var delArray: any = [];
-
     for (let i = 0; i < checkedData.length; i++) {
       data.map((ele) => {
         if (ele.key.includes(checkedData[i])) delArray = [...delArray, ele.key];
       });
     }
-
     let uniqueArray = delArray.filter((item, index) => {
       return delArray.indexOf(item) === index;
     });
     console.log("del array", uniqueArray);
   };
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
     <div>
