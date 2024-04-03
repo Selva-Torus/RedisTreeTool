@@ -21,7 +21,7 @@ export default function Home() {
             : "w-full px-2"
         }`}
       >
-        <RedisFolder setviewData={setData} />
+        <RedisFolder setviewData={setData} setRedisView={setRedisView} />
       </div>
       {data && (
         <div

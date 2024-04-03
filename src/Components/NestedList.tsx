@@ -14,6 +14,7 @@ interface Props {
   setviewData: any;
   checkedData: any;
   setcheckedData: any;
+  setRedisView: any;
 }
 
 const NestedList: React.FC<Props> = ({
@@ -21,13 +22,14 @@ const NestedList: React.FC<Props> = ({
   setviewData,
   checkedData,
   setcheckedData,
+  setRedisView,
 }) => {
   const [collapsedItems, setCollapsedItems] = useState<string[]>([]);
   const [transformedArray, setTransformedArray] = useState({});
 
   useEffect(() => {
     setTransformedArray(transformArray(data as any));
-  }, []);
+  }, [data]);
 
   const toggleCollapse = (key: string, path: string) => {
     const item = path ? `${path}:${key}` : key;
@@ -50,6 +52,8 @@ const NestedList: React.FC<Props> = ({
     const foundObject = data.find((obj: any) => obj.key === key);
 
     const res = await getData(foundObject.key, foundObject.type);
+
+    setRedisView({ key: foundObject.key, type: foundObject.type });
     setviewData(res);
   };
 

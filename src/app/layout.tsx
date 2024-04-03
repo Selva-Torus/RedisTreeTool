@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { PrimeReactProvider, PrimeReactContext } from "primereact/api";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
+import { Providers } from "./NextUIProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,7 +21,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <div className="w-full text-center">Redis Tree DB</div>
-        <PrimeReactProvider>{children}</PrimeReactProvider>
+        <Providers>
+          <PrimeReactProvider>{children}</PrimeReactProvider>
+        </Providers>
       </body>
     </html>
   );
