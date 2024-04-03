@@ -21,7 +21,7 @@ const RedisFolder = ({ setviewData }: any) => {
   const [checkedData, setcheckedData] = useState<any>([]);
 
   const Show = () => {
-    console.log(checkedData);
+    console.log("checkedData", checkedData);
 
     var delArray: any = [];
 
@@ -34,7 +34,7 @@ const RedisFolder = ({ setviewData }: any) => {
     let uniqueArray = delArray.filter((item, index) => {
       return delArray.indexOf(item) === index;
     });
-    console.log(uniqueArray);
+    console.log("del array", uniqueArray);
   };
 
   return (

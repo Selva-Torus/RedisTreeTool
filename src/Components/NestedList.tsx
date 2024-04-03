@@ -1,6 +1,8 @@
 import { transformArray } from "@/utils/additionalFunctions";
 import { getData } from "@/utils/utitsfunction";
 import React, { useEffect, useState } from "react";
+import { IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowForward } from "react-icons/io";
 
 interface NestedObject {
   [key: string]: any;
@@ -8,7 +10,6 @@ interface NestedObject {
 
 interface Props {
   data: NestedObject;
-
   setviewData: any;
   checkedData: any;
   setcheckedData: any;
@@ -37,8 +38,6 @@ const NestedList: React.FC<Props> = ({
   };
 
   const handleGetData = async (path: string) => {
-    console.log(path, "path");
-
     let key = "";
     if (path.endsWith(".config")) {
       key = path.slice(0, -7).split(".").join(":") + ".config";
@@ -50,21 +49,11 @@ const NestedList: React.FC<Props> = ({
     const foundObject = data.find((obj: any) => obj.key === key);
 
     const res = await getData(foundObject.key, foundObject.type);
-    console.log(res);
-
     setviewData(res);
-    console.log(foundObject, "foundobject");
   };
 
   const getPath = (newpath) => {
-    console.log(newpath);
-
     const array = newpath.split(".");
-    console.log(transformedArray);
-
-    // array.forEach((x, i) => {
-    //   console.log(x, i);
-    // });
   };
 
   const renderNested = (
@@ -72,48 +61,28 @@ const NestedList: React.FC<Props> = ({
     depth: number,
     path: string = ""
   ): JSX.Element[] | JSX.Element => {
-    const checkEle = (itemPath) => {
-      console.log(itemPath);
-      // console.log(checkedData);
-
-      // checkedData.map((ele) => {
-      //   console.log(ele.indexOf(itemPath) !== -1);
-      // });
-
-      if (checkedData.includes(itemPath)) {
-        const allele = checkedData;
-        const index = allele.indexOf(itemPath);
-        allele.splice(index, 1);
-        setcheckedData(allele);
-        return;
-      }
-
-      setcheckedData((pre) => [...pre, itemPath]);
-    };
-
     return Object.entries(obj).map(([key, value]) => {
       const itemPath = path ? `${path}:${key}` : key;
       if (typeof value === "object" && value !== null) {
         return (
-          <li key={key} style={{ marginLeft: depth * 10 + "px" }}>
-            <span
+          <li key={key}>
+            <div
+              className="flex items-center cursor-pointer text-blue-500 hover:text-blue-700"
               onClick={() => toggleCollapse(key, path)}
-              style={{ cursor: "pointer" }}
+              style={{ paddingLeft: `${depth * 20}px` }}
             >
               <input
                 type="checkbox"
-                // id="vehicle1"
-                // name="vehicle1"
-                // value="Bike"
-                onClick={() => {
-                  // console.log(key);
-
-                  // setCheck((pre) => !pre);
-                  checkEle(itemPath);
-                }}
-              ></input>
-              {collapsedItems.includes(itemPath) ? "+" : "-"} {key}
-            </span>
+                className="mr-2"
+                onClick={() => checkEle(itemPath)}
+              />
+              {collapsedItems.includes(itemPath) ? (
+                <IoIosArrowForward size={20} />
+              ) : (
+                <IoIosArrowDown size={20} />
+              )}
+              <span className="ml-2">{key}</span>
+            </div>
             {!collapsedItems.includes(itemPath) && (
               <ul>{renderNested(value, depth + 1, itemPath)}</ul>
             )}
@@ -121,10 +90,11 @@ const NestedList: React.FC<Props> = ({
         );
       } else {
         return (
-          <li key={key} style={{ marginLeft: depth * 10 + "px" }}>
+          <li key={key}>
             <span
+              className="cursor-pointer text-green-500 hover:text-green-700"
               onClick={() => handleGetData(path)}
-              style={{ cursor: "pointer" }}
+              style={{ paddingLeft: `${depth * 20}px` }}
             >
               {key}: {value}
             </span>
@@ -132,6 +102,41 @@ const NestedList: React.FC<Props> = ({
         );
       }
     });
+  };
+
+  const checkEle = (itemPath) => {
+    if (checkedData.includes(itemPath)) {
+      const allele = checkedData;
+      const index = allele.indexOf(itemPath);
+      allele.splice(index, 1);
+      setcheckedData(allele);
+      return;
+    }
+
+    let index: any = [];
+    let except: any = [];
+
+    for (let i = 0; i < checkedData.length; i++) {
+      if (checkedData[i].includes(itemPath)) index = [...index, i];
+      else except.push(checkedData[i]);
+    }
+
+    if (index.length) {
+      const dd = checkedData;
+      for (let i = 0; i < index.length; i++) dd.splice(index[i], 1, ":");
+
+      dd.push(itemPath);
+
+      for (let i = 0; i < dd.length; i++)
+        if (dd[i] === ":") {
+          dd.splice(i, 1);
+          i = i - 1;
+        }
+
+      setcheckedData([...dd, ...except]);
+    } else {
+      setcheckedData((pre) => [...pre, itemPath]);
+    }
   };
 
   return <ul>{renderNested(transformedArray, 0)}</ul>;
