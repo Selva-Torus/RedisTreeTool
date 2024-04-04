@@ -37,6 +37,7 @@ const RedisFolder = ({ setviewData, setRedisView }: any) => {
   const [typeFilter, setTypeFilter] = React.useState<Selection>("all");
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [filterValue, setFilterValue] = React.useState("");
+  const [deleteModal, setDeleteModal] = useState(false);
 
   const [bulkDeleteData, setBulkDeleteData] = useState<any>([]);
 
@@ -45,6 +46,8 @@ const RedisFolder = ({ setviewData, setRedisView }: any) => {
   function fetchData() {
     getAllDataFromRedis().then((res: any) => {
       if (res && Array.isArray(res)) {
+        console.log(res);
+
         setData(res);
         setAllData(res);
       }
@@ -80,18 +83,120 @@ const RedisFolder = ({ setviewData, setRedisView }: any) => {
   }, [typeFilter]);
 
   const handleBulkDelete = async () => {
+    // checkedData contains all deleting keys for child and parent
     console.log("checkedData", checkedData);
-    var delArray: any = [];
-    for (let i = 0; i < checkedData.length; i++) {
-      data.map((ele) => {
-        if (ele.key.includes(checkedData[i])) delArray = [...delArray, ele.key];
-      });
+    var allKeys: any = [];
+    for (let i = 0; i < data.length; i++) {
+      allKeys = [...allKeys, data[i].key];
     }
-    let uniqueArray = delArray.filter((item, index) => {
-      return delArray.indexOf(item) === index;
+
+    var final: any = [];
+    for (let i = 0; i < checkedData.length; i++) {
+      for (let j = 0; j < allKeys.length; j++) {
+        if (allKeys[j] == checkedData[i]) {
+          final = [...final, checkedData[i]];
+          break;
+        }
+      }
+
+      if (checkedData[i].includes(":")) {
+        var temp = checkedData[i].split(":");
+        // console.log("temp", temp);
+        for (let j = 0; j < allKeys.length; j++) {
+          if (allKeys[j].includes(":")) {
+            var temp2 = allKeys[j].split(":");
+            // console.log("temp2", temp2);
+            for (let k = 0; k < temp2.length; k++) {
+              if (temp2[k] == temp[k]) {
+                // console.log("called");
+                if (temp.length - 1 == k) {
+                  final = [...final, allKeys[j]];
+                  break;
+                }
+                // k++;
+                continue;
+              }
+              break;
+            }
+          }
+        }
+      } else {
+        for (let j = 0; j < allKeys.length; j++) {
+          var temp = allKeys[j].split(":");
+          if (temp[0] == checkedData[i]) final = [...final, allKeys[j]];
+        }
+      }
+    }
+
+    let uniqueArray = final.filter((item, index) => {
+      return final.indexOf(item) === index;
     });
-    console.log("del array", uniqueArray);
+
+    console.log(uniqueArray);
+
+    setBulkDeleteData(uniqueArray);
+    setDeleteModal(true);
+
+    return;
   };
+
+  const reCheck = (id: any) => {
+    alert(id);
+    // const temp = bulkDeleteData;
+    // temp.splice(id, 1);
+    // setBulkDeleteData(temp);
+    return 1;
+  };
+
+  async function performBulkDelete() {
+    try {
+      let res = await Promise.all(
+        Array.from(bulkDeleteData).map((key) => deleteData(key))
+      );
+      console.log(res);
+      if (res) {
+        fetchData();
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setDeleteModal(false);
+    }
+  }
+
+  function hadleDeletUI() {
+    return (
+      <div className="flex w-full justify-end gap-2">
+        <Button size="sm" onClick={() => setDeleteModal(false)}>
+          cancel
+        </Button>
+        <Button
+          size="sm"
+          color="danger"
+          onClick={() => {
+            performBulkDelete();
+          }}
+        >
+          Delete
+        </Button>
+      </div>
+    );
+    // return (
+    //   <div className="w-full h-full">
+    //     <div className="grid grid-cols-2">
+    //       {bulkDeleteData.map((ele, id) => (
+    //         <div key={id} className="flex gap-2">
+    //           <div>{ele}</div>
+    //           <Button size="sm" onClick={() => reCheck(id)}>
+    //             X
+    //           </Button>
+    //         </div>
+    //       ))}
+    //     </div>
+    //   </div>
+    // );
+  }
+
   return (
     <div>
       <div className="flex w-full justify-between">
@@ -150,6 +255,29 @@ const RedisFolder = ({ setviewData, setRedisView }: any) => {
               </ModalBody>
             </>
           )}
+        </ModalContent>
+      </Modal>
+      <Modal
+        isOpen={deleteModal}
+        onOpenChange={setDeleteModal}
+        placement="center"
+        // className="w-[80vw] h-[80vh]"
+      >
+        <ModalContent>
+          <>
+            <ModalHeader className="flex flex-col gap-1">
+              <div className="px-1 py-2">
+                <div className="text-small font-bold">
+                  Confirm Delete Action
+                </div>
+                <div className="text-tiny">
+                  Are you sure you want to delete the selected items?
+                </div>
+                <div className="text-tiny">This action cannot be undone </div>
+              </div>
+            </ModalHeader>
+            <ModalBody>{hadleDeletUI()}</ModalBody>
+          </>
         </ModalContent>
       </Modal>
     </div>

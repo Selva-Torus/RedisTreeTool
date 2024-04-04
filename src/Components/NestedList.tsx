@@ -115,6 +115,7 @@ const NestedList: React.FC<Props> = ({
   };
 
   const checkEle = (itemPath) => {
+    // for check if the key is already exist the remove that key simply check and uncheck
     if (checkedData.includes(itemPath)) {
       const allele = checkedData;
       const index = allele.indexOf(itemPath);
@@ -123,28 +124,31 @@ const NestedList: React.FC<Props> = ({
       return;
     }
 
-    let index: any = [];
-    let except: any = [];
+    // for remove child depend on thier parent
+    let index: any = []; // its holds child indes=x
+    let except: any = []; // its holds not thier own child
 
     for (let i = 0; i < checkedData.length; i++) {
       if (checkedData[i].includes(itemPath)) index = [...index, i];
       else except.push(checkedData[i]);
     }
 
+    //if child found then remove it
     if (index.length) {
-      const dd = checkedData;
-      for (let i = 0; i < index.length; i++) dd.splice(index[i], 1, ":");
+      const tempArray = checkedData;
+      for (let i = 0; i < index.length; i++) tempArray.splice(index[i], 1, ":");
 
-      dd.push(itemPath);
+      tempArray.push(itemPath); // all own child removed and add parent
 
-      for (let i = 0; i < dd.length; i++)
-        if (dd[i] === ":") {
-          dd.splice(i, 1);
+      for (let i = 0; i < tempArray.length; i++)
+        if (tempArray[i] === ":") {
+          tempArray.splice(i, 1);
           i = i - 1;
         }
 
-      setcheckedData([...dd, ...except]);
+      setcheckedData([...tempArray, ...except]);
     } else {
+      // add new parent or child
       setcheckedData((pre) => [...pre, itemPath]);
     }
   };
